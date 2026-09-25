@@ -16,23 +16,7 @@ Most home-lab SIEM projects stop at "I installed Wazuh and it shows alerts." Thi
 
 ## Architecture
 
-```
-                    [Internet]
-                        |
-                       NAT
-                        |
-                  ┌─────────────┐
-                  │  OPNsense   │  Default-deny firewall
-                  │  WAN / LAN / MGMT
-                  └─────────────┘
-                    /          \
-        192.168.57.0/24    192.168.56.0/24
-        (endpoint segment)   (management segment)
-                |                    |
-      ┌─────────┴─────────┐    ┌─────┴─────┐
-  win11-endpoint     rocky-endpoint   wazuh-manager
-  (Sysmon)           (auditd)         (indexer, dashboard)
-```
+![Home SOC Lab network architecture](docs/images/architecture.png)
 
 The manager sits on its own segment, deliberately single-homed rather than bridging both zones — every agent check-in and every denied packet crosses the firewall boundary, which is what makes the firewall worth having.
 
