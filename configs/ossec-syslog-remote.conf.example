@@ -1,0 +1,15 @@
+<!--
+  Example remote syslog listener for OPNsense firewall logs
+  Real file: /var/ossec/etc/ossec.conf (on the manager)
+
+  allowed-ips is restricted deliberately: syslog over UDP is
+  unauthenticated, so without this restriction anything able to
+  reach port 514 could inject fabricated events into the SIEM.
+  Replace with your own firewall's OPT1/MGMT-side address.
+-->
+<remote>
+  <connection>syslog</connection>
+  <port>514</port>
+  <protocol>udp</protocol>
+  <allowed-ips>192.168.56.254</allowed-ips>
+</remote>
