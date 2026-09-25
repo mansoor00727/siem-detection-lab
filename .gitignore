@@ -1,0 +1,12 @@
+# Never commit real configs, credentials, or unsanitized exports
+*.conf
+!*.conf.example
+*.rules
+!*wazuh.rules.example
+.env
+*.pem
+*.key
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
