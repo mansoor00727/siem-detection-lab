@@ -1,0 +1,65 @@
+<!--
+  Custom Wazuh detection rules — SIEM Detection Lab
+  Lives at /var/ossec/etc/rules/local_rules.xml on the manager.
+  Rule ID range 100000+ follows Wazuh's convention for local/custom rules
+  (vs. vendor-shipped rules, which live below 100000).
+
+  See docs/phase5-detection-rules.md for the gap each rule closes,
+  how each was verified, and one rule that was built and then
+  deliberately deleted after further testing showed the gap it
+  targeted was not real (documented there, not reproduced here).
+-->
+<group name="local,syslog,">
+
+  <!-- Linux command execution visibility (Rocky endpoint, via auditd)
+       Gap: auditd captured this via custom keys, but Wazuh's stock
+       ruleset only alerted on auditd *configuration* changes, never
+       on execution matching these keys. -->
+  <rule id="100400" level="5">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^exec_commands$</field>
+    <description>Command executed on monitored Linux host (auditd exec_commands)</description>
+    <mitre>
+      <id>T1059</id>
+    </mitre>
+  </rule>
+
+  <rule id="100401" level="5">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^exec_commands_root$</field>
+    <description>Command executed as root on monitored Linux host (auditd exec_commands_root)</description>
+    <mitre>
+      <id>T1059</id>
+    </mitre>
+  </rule>
+
+  <!-- Cron persistence via direct spool write (Rocky endpoint)
+       Gap: existing detection only worked via crontab's own log line;
+       a direct write to the spool file bypassed it entirely. -->
+  <rule id="100402" level="8">
+    <if_group>audit</if_group>
+    <field name="audit.key" type="pcre2">^cron_persistence$</field>
+    <description>Direct write to cron spool directory (bypasses crontab self-logging)</description>
+    <mitre>
+      <id>T1053.003</id>
+    </mitre>
+  </rule>
+
+  <!-- Cross-segment firewall blocks, independent of frequency
+       Gap: the only stock alerting rule requires an 18-events/45s burst,
+       so a slow, deliberate single-connection probe never trips it.
+       Chained off 87701 (a stock rule that matches every block event
+       but is itself suppressed from logging - it exists only to feed
+       87702's burst counter), so this inherits correct match logic
+       without duplicating it. -->
+  <rule id="100500" level="8">
+    <if_sid>87701</if_sid>
+    <srcip>192.168.57.0/24</srcip>
+    <dstip>192.168.56.0/24</dstip>
+    <description>Blocked traffic from endpoint segment to management segment</description>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+  </rule>
+
+</group>

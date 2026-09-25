@@ -1,0 +1,12 @@
+<!--
+  Example FIM (syscheck) snippet — Rocky Linux endpoint
+  Real file: /var/ossec/etc/ossec.conf
+
+  realtime="yes" is required — files created before an agent restart
+  are absorbed into the baseline scan rather than flagged as "added".
+  See docs/phase2-network-architecture.md and phase5-detection-rules.md
+  for the specific troubleshooting case this caused.
+-->
+<syscheck>
+  <directories realtime="yes">/etc,/usr/bin,/usr/sbin,/var/spool/cron</directories>
+</syscheck>

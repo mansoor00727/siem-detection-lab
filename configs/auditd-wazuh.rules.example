@@ -1,0 +1,17 @@
+# Example auditd rules — Rocky Linux endpoint
+# Real file: /etc/audit/rules.d/wazuh.rules
+#
+# These feed Wazuh custom rules 100400/100401/100402
+# (see detections/local_rules.xml and docs/phase5-detection-rules.md)
+
+## Sensitive file watches
+-w /etc/passwd -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/sudoers -p wa -k sudoers_changes
+-w /var/spool/cron -p wa -k cron_persistence
+
+## Command execution visibility (execve-level)
+## Split by privilege so unprivileged and root execution
+## alert as two distinct, independently-tunable signals.
+-a always,exit -F arch=b64 -S execve -F euid>=1000 -F euid!=4294967295 -k exec_commands
+-a always,exit -F arch=b64 -S execve -F euid=0 -k exec_commands_root
